@@ -2,6 +2,7 @@ import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
 import 'package:PiliPlus/common/widgets/video_card/video_card_h.dart';
 import 'package:PiliPlus/http/loading_state.dart';
+import 'package:PiliPlus/models/horizontal_video_model.dart';
 import 'package:PiliPlus/models/model_hot_video_item.dart';
 import 'package:PiliPlus/pages/rank/zone/controller.dart';
 import 'package:PiliPlus/pages/rank/zone/widget/pgc_rank_item.dart';
@@ -10,10 +11,20 @@ import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart';
 
 class ZonePage extends StatefulWidget {
-  const ZonePage({super.key, this.rid, this.seasonType});
+  const ZonePage({
+    super.key,
+    required this.tag,
+    this.rid,
+    this.seasonType,
+    this.keyword,
+    this.searchTid,
+  });
 
+  final String tag;
   final int? rid;
   final int? seasonType;
+  final String? keyword;
+  final int? searchTid;
 
   @override
   State<ZonePage> createState() => _ZonePageState();
@@ -26,8 +37,13 @@ class _ZonePageState extends State<ZonePage>
   @override
   void initState() {
     controller = Get.put(
-      ZoneController(rid: widget.rid, seasonType: widget.seasonType),
-      tag: '${widget.rid}${widget.seasonType}',
+      ZoneController(
+        rid: widget.rid,
+        seasonType: widget.seasonType,
+        keyword: widget.keyword,
+        searchTid: widget.searchTid,
+      ),
+      tag: widget.tag,
     );
     super.initState();
   }
@@ -62,12 +78,18 @@ class _ZonePageState extends State<ZonePage>
                 gridDelegate: gridDelegate,
                 itemBuilder: (context, index) {
                   final item = response[index];
-                  if (item is HotVideoItemModel) {
+                  if (index == response.length - 1 &&
+                      widget.keyword != null) {
+                    controller.onLoadMore();
+                  }
+                  if (item is HorizontalVideoModel) {
                     return VideoCardH(
                       videoItem: item,
-                      onRemove: () => controller.loadingState
-                        ..value.data!.removeAt(index)
-                        ..refresh(),
+                      onRemove: item is HotVideoItemModel
+                          ? () => controller.loadingState
+                              ..value.data!.removeAt(index)
+                              ..refresh()
+                          : null,
                     );
                   }
                   return PgcRankItem(item: item);

@@ -6,6 +6,10 @@ enum RankType {
   music('音乐', rid: 1003),
   dance('舞蹈', rid: 1004),
   game('游戏', rid: 1008),
+  // The official Android client exposes this as a game channel. The channel
+  // id is server-configured, so use the stable video-search fallback instead
+  // of hard-coding a value that can change.
+  deltaAction('三角洲', keyword: '三角洲行动', searchTid: 4),
   knowledge('知识', rid: 1010),
   tech('科技', rid: 1012),
   sports('运动', rid: 1018),
@@ -25,5 +29,16 @@ enum RankType {
   final String label;
   final int? rid;
   final int? seasonType;
-  const RankType(this.label, {this.rid, this.seasonType});
+  final String? keyword;
+  final int? searchTid;
+
+  String get tag => keyword == null ? '$rid$seasonType' : '$keyword$searchTid';
+
+  const RankType(
+    this.label, {
+    this.rid,
+    this.seasonType,
+    this.keyword,
+    this.searchTid,
+  });
 }
